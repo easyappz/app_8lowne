@@ -54,7 +54,7 @@ class RegisterView(APIView):
                 },
                 status=status.HTTP_201_CREATED,
             )
-        return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": str(serializer.errors)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LoginView(APIView):
@@ -73,7 +73,7 @@ class LoginView(APIView):
         serializer = LoginSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(
-                {"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST
+                {"error": str(serializer.errors)}, status=status.HTTP_400_BAD_REQUEST
             )
 
         username = serializer.validated_data.get("username")
@@ -122,8 +122,13 @@ class ProfileView(APIView):
             token = Token.objects.get(key=token_key)
             member = Member.objects.get(id=token.user_id)
 
-            serializer = MemberSerializer(member)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(
+                {
+                    "id": member.id,
+                    "username": member.username,
+                },
+                status=status.HTTP_200_OK,
+            )
         except (Token.DoesNotExist, Member.DoesNotExist):
             return Response(
                 {"error": "Invalid token or user not found"},
