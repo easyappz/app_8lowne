@@ -1,0 +1,36 @@
+openapi: 3.0.3
+info:
+  title: User Authentication API
+  version: 1.0.0
+  description: API for user registration, login and profile management
+
+servers:
+  - url: http://localhost:8000
+    description: Development server
+
+security:
+  - TokenAuth: []
+
+components:
+  securitySchemes:
+    TokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Token authentication using 'Token <token>' format
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+
+paths:
+  /api/register/:
+    $ref: './paths/register.yml'
+  /api/login/:
+    $ref: './paths/login.yml'
+  /api/profile/:
+    $ref: './paths/profile.yml'
