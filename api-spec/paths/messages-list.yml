@@ -1,0 +1,102 @@
+get:
+  summary: Get chat messages history
+  description: Retrieves the list of all chat messages
+  operationId: getMessages
+  tags:
+    - Chat
+  security:
+    - TokenAuth: []
+  x-isSecure: true
+  responses:
+    '200':
+      description: Successfully retrieved messages
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  description: Message ID
+                  example: 1
+                username:
+                  type: string
+                  description: Username of the message sender
+                  example: "john_doe"
+                text:
+                  type: string
+                  description: Message text content
+                  example: "Hello, how are you?"
+                timestamp:
+                  type: string
+                  format: date-time
+                  description: Message creation timestamp
+                  example: "2024-01-15T10:30:00Z"
+    '401':
+      description: Unauthorized - invalid or missing token
+      content:
+        application/json:
+          schema:
+            $ref: '../openapi.yml#/components/schemas/Error'
+
+post:
+  summary: Send a new message
+  description: Creates and sends a new chat message
+  operationId: sendMessage
+  tags:
+    - Chat
+  security:
+    - TokenAuth: []
+  x-isSecure: true
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - text
+          properties:
+            text:
+              type: string
+              description: Message text content
+              example: "Hello, how are you?"
+  responses:
+    '201':
+      description: Message successfully created
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: Message ID
+                example: 1
+              username:
+                type: string
+                description: Username of the message sender
+                example: "john_doe"
+              text:
+                type: string
+                description: Message text content
+                example: "Hello, how are you?"
+              timestamp:
+                type: string
+                format: date-time
+                description: Message creation timestamp
+                example: "2024-01-15T10:30:00Z"
+    '400':
+      description: Bad request - invalid data
+      content:
+        application/json:
+          schema:
+            $ref: '../openapi.yml#/components/schemas/Error'
+    '401':
+      description: Unauthorized - invalid or missing token
+      content:
+        application/json:
+          schema:
+            $ref: '../openapi.yml#/components/schemas/Error'
