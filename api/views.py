@@ -11,7 +11,7 @@ from .serializers import (
     RegisterSerializer,
     LoginSerializer,
 )
-from .models import Member
+from .models import Member, Message
 
 
 class HelloView(APIView):
@@ -134,3 +134,45 @@ class ProfileView(APIView):
                 {"error": "Invalid token or user not found"},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
+
+
+class MessagesListView(APIView):
+    """
+    Get all chat messages and create new messages.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        responses={200: MessageSerializer(many=True)},
+        description="Get all chat messages",
+    )
+    def get(self, request):
+        """Get all messages."""
+        messages = Message.objects.select_related("member").all()
+        serializer = MessageSerializer(messages, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        request=MessageSerializer,
+        responses={201: MessageSerializer},
+        description="Create a new chat message",
+    )
+    def post(self, request):
+        """Create a new message."""
+        try:
+            token_key = request.auth.key
+            token = Token.objects.get(key=token_key)
+            member = Member.objects.get(id=token.user_id)
+        except (Token.DoesNotExist, Member.DoesNotExist):
+            return Response(
+                {"error": "Invalid token or user not found"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        serializer = MessageSerializer(data=request.data)
+        if serializer.is_valid():
+            message = serializer.save(member=member)
+            response_serializer = MessageSerializer(message)
+            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+        return Response({"error": str(serializer.errors)}, status=status.HTTP_400_BAD_REQUEST)

@@ -1,10 +1,16 @@
 from rest_framework import serializers
-from .models import Member
+from .models import Member, Message
 
 
-class MessageSerializer(serializers.Serializer):
-    message = serializers.CharField(max_length=200)
-    timestamp = serializers.DateTimeField(read_only=True)
+class MessageSerializer(serializers.ModelSerializer):
+    """Serializer for chat messages."""
+
+    username = serializers.CharField(source="member.username", read_only=True)
+
+    class Meta:
+        model = Message
+        fields = ["id", "username", "text", "timestamp"]
+        read_only_fields = ["id", "username", "timestamp"]
 
 
 class MemberSerializer(serializers.ModelSerializer):
